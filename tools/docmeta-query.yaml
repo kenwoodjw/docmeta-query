@@ -1,0 +1,82 @@
+identity:
+  name: "docmeta-query"
+  author: "kenwood"
+  label:
+    en_US: "docmeta-query"
+    zh_Hans: "docmeta-query"
+    pt_BR: "docmeta-query"
+description:
+  human:
+    en_US: "Query document metadata by document name across datasets"
+    zh_Hans: "在多个数据集中按文档名查询文档元数据"
+    pt_BR: "Consultar metadados de documentos por nome em vários datasets"
+  llm: "Query document metadata by document name across datasets and return document_name with metadata. If metadata_filter provided, only include matching metadata entries."
+parameters:
+  - name: dataset_list
+    type: string
+    required: true
+    label:
+      en_US: Dataset ID List
+      zh_Hans: 数据集ID列表
+      pt_BR: Lista de IDs de dataset
+    human_description:
+      en_US: "List of dataset IDs to search"
+      zh_Hans: "需要查询的数据集ID列表"
+      pt_BR: "Lista de IDs de datasets para buscar"
+    llm_description: "A list of dataset IDs to search for the document."
+    form: llm
+  - name: kb_api_key
+    type: string
+    required: true
+    label:
+      en_US: Knowledge Base API Key
+      zh_Hans: 知识库 API Key
+      pt_BR: Chave de API da Base de Conhecimento
+    human_description:
+      en_US: "API key used for Authorization header"
+      zh_Hans: "用于 Authorization 头的 API Key"
+      pt_BR: "Chave de API usada no cabeçalho Authorization"
+    llm_description: "API key for the knowledge base service, used as Bearer token."
+    form: llm
+  - name: kb_base_url
+    type: string
+    required: false
+    label:
+      en_US: Knowledge Base Base URL
+      zh_Hans: 知识库基础地址
+      pt_BR: URL base da Base de Conhecimento
+    human_description:
+      en_US: "Optional. Base URL of the knowledge base service. Default: http://127.0.0.1:5001"
+      zh_Hans: "可选。知识库服务基础地址。默认：http://127.0.0.1:5001"
+      pt_BR: "Opcional. URL base do serviço da base de conhecimento. Padrão: http://127.0.0.1:5001"
+    llm_description: "Optional. Override the base URL if not using the default localhost endpoint."
+    form: llm
+  - name: document_name
+    type: string
+    required: true
+    label:
+      en_US: Document Name (keyword)
+      zh_Hans: 文档名（关键词）
+      pt_BR: Nome do Documento (palavra‑chave)
+    human_description:
+      en_US: "Keyword to match the document name"
+      zh_Hans: "用于匹配的文档名关键字"
+      pt_BR: "Palavra‑chave para corresponder ao nome do documento"
+    llm_description: "Keyword used to search documents by name."
+    form: llm
+  - name: metadata_filter
+    type: string
+    required: false
+    label:
+      en_US: Metadata Filter (optional)
+      zh_Hans: 元数据过滤器（可选）
+      pt_BR: Filtro de metadados (opcional)
+    human_description:
+      en_US: "Optional filter. Accepts JSON array of metadata names (e.g. [\"type\", \"uploader\"]) or JSON object mapping names to expected values (e.g. {\"type\": \"pdf\"}). Comma‑separated names also supported."
+      zh_Hans: "可选。可为元数据名数组（如 [\"type\", \"uploader\"])，或名到期望值的映射对象（如 {\"type\": \"pdf\"}）。也支持以逗号分隔的名称字符串。"
+      pt_BR: "Opcional. Aceita lista JSON de nomes de metadados ou objeto JSON mapeando nomes para valores esperados; também aceita nomes separados por vírgula."
+    llm_description: "Optional. If provided, only include metadata entries whose names are in this list, or match the provided name→value map."
+    form: llm
+extra:
+  python:
+    source: tools/docmeta-query.py

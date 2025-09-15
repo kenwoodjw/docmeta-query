@@ -1,0 +1,41 @@
+version: 0.0.1
+type: plugin
+author: kenwood
+name: docmeta-query
+label:
+  en_US: docmeta-query
+  ja_JP: docmeta-query
+  zh_Hans: docmeta-query
+  pt_BR: docmeta-query
+description:
+  en_US: query document metadata
+  ja_JP: query document metadata
+  zh_Hans: query document metadata
+  pt_BR: query document metadata
+icon: icon.svg
+icon_dark: icon-dark.svg
+resource:
+  memory: 268435456
+  permission:
+    tool:
+      enabled: true
+    endpoint:
+      enabled: true
+    app:
+      enabled: true
+plugins:
+  tools:
+    - provider/docmeta-query.yaml
+meta:
+  version: 0.0.1
+  arch:
+    - amd64
+    - arm64
+  runner:
+    language: python
+    version: "3.12"
+    entrypoint: main
+  minimum_dify_version: 1.4.1
+created_at: 2025-09-12T23:17:38.909024+08:00
+privacy: PRIVACY.md
+verified: false
