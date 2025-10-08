@@ -15,7 +15,7 @@ class DocmetaQueryTool(Tool):
     Inputs (via tool_parameters):
       - dataset_list: list[str] | str (JSON array or comma-separated)
       - kb_api_key: str
-      - document_name: str
+      - document_name: list[str] | str (JSON array, comma-separated, or single keyword)
       - metadata_filter: Optional[str] (JSON list of names, or JSON object {name: expected_value},
         or comma-separated names)
 
@@ -30,7 +30,7 @@ class DocmetaQueryTool(Tool):
         try:
             dataset_list = self._normalize_dataset_list(tool_parameters.get("dataset_list"))
             api_key = self._require_str(tool_parameters.get("kb_api_key"), name="kb_api_key")
-            document_name = self._require_str(tool_parameters.get("document_name"), name="document_name")
+            document_name_list = self._normalize_document_name_list(tool_parameters.get("document_name"))
             metadata_filter_raw = tool_parameters.get("metadata_filter")
             base_url = self._normalize_base_url(tool_parameters.get("kb_base_url"))
             name_filter_set, name_value_map = self._parse_metadata_filter(metadata_filter_raw)
@@ -41,30 +41,31 @@ class DocmetaQueryTool(Tool):
         aggregated: list[dict[str, Any]] = []
         errors: list[str] = []
         for ds_id in dataset_list:
-            try:
-                docs = self._fetch_documents(
-                    base_url=base_url,
-                    dataset_id=ds_id,
-                    api_key=api_key,
-                    keyword=document_name,
-                )
-            except Exception as e:  # network or parse errors per dataset shouldn't stop others
-                errors.append(f"dataset {ds_id}: {e}")
-                continue
+            for doc_name_keyword in document_name_list:
+                try:
+                    docs = self._fetch_documents(
+                        base_url=base_url,
+                        dataset_id=ds_id,
+                        api_key=api_key,
+                        keyword=doc_name_keyword,
+                    )
+                except Exception as e:  # network or parse errors per dataset shouldn't stop others
+                    errors.append(f"dataset {ds_id}, keyword '{doc_name_keyword}': {e}")
+                    continue
 
-            for doc in docs:
-                # Prefer top-level name; fallback to metadata 'document_name'
-                doc_name = cast(str | None, doc.get("name"))
-                if not doc_name:
-                    doc_name = self._extract_document_name_from_metadata(doc.get("doc_metadata", []))
-                # Ensure metadata list
-                metadata_list = cast(list[dict[str, Any]], doc.get("doc_metadata", []) or [])
-                filtered_metadata = self._filter_metadata(metadata_list, name_filter_set, name_value_map)
+                for doc in docs:
+                    # Prefer top-level name; fallback to metadata 'document_name'
+                    doc_name = cast(str | None, doc.get("name"))
+                    if not doc_name:
+                        doc_name = self._extract_document_name_from_metadata(doc.get("doc_metadata", []))
+                    # Ensure metadata list
+                    metadata_list = cast(list[dict[str, Any]], doc.get("doc_metadata", []) or [])
+                    filtered_metadata = self._filter_metadata(metadata_list, name_filter_set, name_value_map)
 
-                aggregated.append({
-                    "document_name": doc_name or "",
-                    "metadata": filtered_metadata,
-                })
+                    aggregated.append({
+                        "document_name": doc_name or "",
+                        "metadata": filtered_metadata,
+                    })
 
         if not aggregated:
             if errors:
@@ -112,6 +113,40 @@ class DocmetaQueryTool(Tool):
             parts = [p for p in parts if p]
             if not parts:
                 raise ValueError("parameter 'dataset_list' is empty")
+            return parts
+        # other types: attempt to coerce into a list
+        return [str(val)]
+
+    def _normalize_document_name_list(self, val: Any) -> list[str]:
+        """
+        Normalize document_name parameter to a list of keywords.
+        Accepts:
+          - list[str]: direct list of keywords
+          - str: JSON array, comma-separated, or single keyword
+        """
+        if val is None:
+            raise ValueError("missing required parameter: document_name")
+        if isinstance(val, list):
+            items = [str(x).strip() for x in val if str(x).strip()]
+            if not items:
+                raise ValueError("parameter 'document_name' is empty")
+            return items
+        if isinstance(val, str):
+            s = val.strip()
+            if not s:
+                raise ValueError("parameter 'document_name' is empty")
+            # Try JSON array first
+            if (s.startswith("[") and s.endswith("]")) or (s.startswith("\"") and s.endswith("\"")):
+                try:
+                    parsed = json.loads(s)
+                    return self._normalize_document_name_list(parsed)
+                except Exception:
+                    pass
+            # Fallback: comma/Chinese comma/newline separated
+            parts = [p.strip() for p in s.replace("\n", ",").replace("，", ",").split(",")]
+            parts = [p for p in parts if p]
+            if not parts:
+                raise ValueError("parameter 'document_name' is empty")
             return parts
         # other types: attempt to coerce into a list
         return [str(val)]

@@ -55,14 +55,14 @@ parameters:
     type: string
     required: true
     label:
-      en_US: Document Name (keyword)
+      en_US: Document Name (keywords)
       zh_Hans: 文档名（关键词）
-      pt_BR: Nome do Documento (palavra‑chave)
+      pt_BR: Nome do Documento (palavras‑chave)
     human_description:
-      en_US: "Keyword to match the document name"
-      zh_Hans: "用于匹配的文档名关键字"
-      pt_BR: "Palavra‑chave para corresponder ao nome do documento"
-    llm_description: "Keyword used to search documents by name."
+      en_US: "Keywords to match document names. Accepts JSON array, comma-separated values, or single keyword."
+      zh_Hans: "用于匹配文档名的关键词。支持 JSON 数组、逗号分隔或单个关键词。"
+      pt_BR: "Palavras‑chave para corresponder aos nomes dos documentos. Aceita array JSON, valores separados por vírgula ou palavra‑chave única."
+    llm_description: "Keywords used to search documents by name. Can be a list (JSON array or comma-separated) or a single keyword."
     form: llm
   - name: metadata_filter
     type: string

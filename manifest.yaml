@@ -1,4 +1,4 @@
-version: 0.0.1
+version: 0.0.2
 type: plugin
 author: kenwood
 name: docmeta-query
@@ -27,7 +27,7 @@ plugins:
   tools:
     - provider/docmeta-query.yaml
 meta:
-  version: 0.0.1
+  version: 0.0.2
   arch:
     - amd64
     - arm64
@@ -36,6 +36,6 @@ meta:
     version: "3.12"
     entrypoint: main
   minimum_dify_version: 1.4.1
-created_at: 2025-09-12T23:17:38.909024+08:00
+created_at: 2025-10-08T11:09:38.909024+08:00
 privacy: PRIVACY.md
 verified: false
